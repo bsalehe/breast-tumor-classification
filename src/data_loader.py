@@ -14,8 +14,10 @@ class BreastUltrasoundDataset(Dataset):
         self.transform = transform
 
         # Assume images in 'data' subfolder and masks in 'mask' subfolder
-        self.image_dir = os.path.join(root_dir, 'data')
-        self.mask_dir = os.path.join(root_dir, 'mask')
+        #self.image_dir = os.path.join(root_dir, 'data')
+        self.image_dir = root_dir
+        #self.mask_dir = os.path.join(root_dir, 'mask')
+        self.mask_dir = root_dir  # same as image_dir
 
         self.image_names = sorted(os.listdir(self.image_dir))
 
