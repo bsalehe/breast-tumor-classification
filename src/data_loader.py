@@ -5,32 +5,36 @@ from torchvision import transforms
 
 class BreastUltrasoundDataset(Dataset):
     def __init__(self, root_dir, transform=None):
-        """
-        Args:
-            root_dir (string): Directory with all images and masks, e.g. 'data/raw/Dataset_BUSI_with_GT'
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
-        self.root_dir = root_dir
+        self.image_paths = []
+        self.mask_paths = []
         self.transform = transform
 
-        # Assume images in 'data' subfolder and masks in 'mask' subfolder
-        #self.image_dir = os.path.join(root_dir, 'data')
-        self.image_dir = root_dir
-        #self.mask_dir = os.path.join(root_dir, 'mask')
-        self.mask_dir = root_dir  # same as image_dir
+        for class_folder in os.listdir(root_dir):
+            class_path = os.path.join(root_dir, class_folder)
 
-        self.image_names = sorted(os.listdir(self.image_dir))
+            if not os.path.isdir(class_path):
+                continue
+
+            for fname in os.listdir(class_path):
+                fpath = os.path.join(class_path, fname)
+                if os.path.isfile(fpath):
+                    if 'mask' in fname.lower():
+                        self.mask_paths.append(fpath)
+                    else:
+                        self.image_paths.append(fpath)
+
+        self.image_paths.sort()
+        self.mask_paths.sort()
 
     def __len__(self):
-        return len(self.image_names)
+        return len(self.image_paths)
 
     def __getitem__(self, idx):
-        img_name = self.image_names[idx]
-        img_path = os.path.join(self.image_dir, img_name)
-        mask_path = os.path.join(self.mask_dir, img_name)  # mask has same name
+        img_path = self.image_paths[idx]
+        mask_path = self.mask_paths[idx]
 
         image = Image.open(img_path).convert("RGB")
-        mask = Image.open(mask_path).convert("L")  # grayscale mask
+        mask = Image.open(mask_path).convert("L")
 
         if self.transform:
             image = self.transform(image)
